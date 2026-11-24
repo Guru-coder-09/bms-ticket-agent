@@ -1,9 +1,9 @@
-name: BookMyShow 20-Min Ticket Monitor
+name: BookMyShow 1-Min Continuous Ticket Monitor
 
 on:
   schedule:
-    # Runs every 20 minutes (UTC cron syntax)
-    - cron: '*/20 * * * *'
+    # Runs every 5 minutes (fastest cron allowed by GitHub Actions)
+    - cron: '*/5 * * * *'
   workflow_dispatch: # Allows manual trigger from GitHub UI anytime
 
 jobs:
@@ -27,13 +27,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run BookMyShow Ticket Checker
+      - name: Run BookMyShow Ticket Checker (Checks every 60s)
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
-          python bms_monitor.py --once
+          # Performs 5 checks spaced 60 seconds apart for true 1-minute continuous monitoring
+          python bms_monitor.py --repeat 5 --delay 60
 
       - name: Commit and Push State (to prevent duplicate alerts)
         run: |

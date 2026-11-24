@@ -302,16 +302,18 @@ def send_test_message(config):
         f"Watching for: <b>{config['movie']['name']}</b>\n"
         f"Venue: <b>{config['venues'][0]['name']}</b>\n"
         f"Screen Target: <b>Dolby Cinema / Screen 1</b>\n"
-        "Check Interval: <b>Every 20 Minutes</b>\n\n"
+        "Check Interval: <b>Every 1 Minute</b>\n\n"
         "✅ Notifications are connected. You will receive an instant alert with a direct booking link as soon as tickets open!"
     )
     notify(msg, sample_url)
 
 def main():
     parser = argparse.ArgumentParser(description="BookMyShow Ticket Monitor Agent")
-    parser.add_argument("--once", action="store_true", help="Run once and exit (for Cron / GitHub Actions)")
-    parser.add_argument("--daemon", action="store_true", help="Run continuously in a loop")
-    parser.add_argument("--interval", type=int, default=20, help="Check interval in minutes (default: 20)")
+    parser.add_argument("--once", action="store_true", help="Run once and exit (default)")
+    parser.add_argument("--repeat", type=int, default=1, help="Number of check cycles to run before exiting (useful for high-frequency cloud crons)")
+    parser.add_argument("--delay", type=int, default=60, help="Delay in seconds between repeated cycles (default: 60)")
+    parser.add_argument("--daemon", action="store_true", help="Run continuously in a loop indefinitely")
+    parser.add_argument("--interval", type=int, default=1, help="Check interval in minutes for daemon mode (default: 1)")
     parser.add_argument("--test-notify", action="store_true", help="Send a test notification to verify setup")
     args = parser.parse_args()
 
@@ -323,16 +325,27 @@ def main():
 
     if args.daemon:
         interval_secs = args.interval * 60
-        print(f"[*] Starting BMS Agent in daemon mode. Checking every {args.interval} minutes...")
+        print(f"[*] Starting BMS Agent in daemon mode. Checking every {args.interval} minute(s)...")
         while True:
             try:
                 check_tickets(config)
             except Exception as e:
                 print(f"[!] Unexpected error in scan cycle: {e}")
-            print(f"[*] Sleeping for {args.interval} minutes. Next run at {(datetime.datetime.now() + datetime.timedelta(seconds=interval_secs)).strftime('%H:%M:%S')}...")
+            print(f"[*] Sleeping for {args.interval} minute(s). Next run at {(datetime.datetime.now() + datetime.timedelta(seconds=interval_secs)).strftime('%H:%M:%S')}...")
             time.sleep(interval_secs)
+    elif args.repeat > 1:
+        print(f"[*] Running batch check: {args.repeat} checks with {args.delay}s delay between checks...")
+        for i in range(args.repeat):
+            print(f"\n--- [Cycle {i+1}/{args.repeat}] ---")
+            try:
+                check_tickets(config)
+            except Exception as e:
+                print(f"[!] Unexpected error in check cycle: {e}")
+            if i < args.repeat - 1:
+                print(f"[*] Waiting {args.delay}s before next check...")
+                time.sleep(args.delay)
     else:
-        # Default behavior: run once (ideal for GitHub Actions & serverless crons)
+        # Default behavior: run once (ideal for standard runs)
         check_tickets(config)
 
 if __name__ == "__main__":

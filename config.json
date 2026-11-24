@@ -35,5 +35,6 @@
     "SCREEN 1",
     "SCREEN 2"
   ],
-  "check_interval_minutes": 20
+  "check_interval_minutes": 1,
+  "check_interval_seconds": 60
 }
