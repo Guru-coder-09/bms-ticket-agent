@@ -40,4 +40,4 @@ jobs:
           git config --global user.name "BMS-Bot"
           git config --global user.email "bot@github-actions.internal"
           git add last_state.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update BMS state [skip ci]" && git push)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update BMS state [skip ci]" && git push || true)
