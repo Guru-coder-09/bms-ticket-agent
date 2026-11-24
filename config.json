@@ -1,0 +1,39 @@
+{
+  "region": "hyderabad",
+  "region_code": "HYD",
+  "movie": {
+    "name": "Avengers: Doomsday",
+    "event_code": "ET00526320",
+    "slug": "avengers-doomsday"
+  },
+  "venues": [
+    {
+      "name": "ALLU Cinemas: Kokapet",
+      "code": "ALUC",
+      "slug": "allu-cinemas-kokapet",
+      "preferred_screen": "DOLBY CINEMA",
+      "is_primary": true
+    },
+    {
+      "name": "AAA Cinemas: Ameerpet",
+      "code": "ACAS",
+      "slug": "aaa-cinemas-ameerpet",
+      "preferred_screen": "SCREEN 1 (ATMOS)",
+      "is_primary": false
+    }
+  ],
+  "target_dates": [
+    "20261217",
+    "20261218",
+    "20261219",
+    "20261220"
+  ],
+  "preferred_keywords": [
+    "DOLBY CINEMA",
+    "DOLBY",
+    "ATMOS",
+    "SCREEN 1",
+    "SCREEN 2"
+  ],
+  "check_interval_minutes": 20
+}

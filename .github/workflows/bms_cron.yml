@@ -1,0 +1,43 @@
+name: BookMyShow 20-Min Ticket Monitor
+
+on:
+  schedule:
+    # Runs every 20 minutes (UTC cron syntax)
+    - cron: '*/20 * * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub UI anytime
+
+jobs:
+  check-tickets:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Allows committing updated state file back to repository
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run BookMyShow Ticket Checker
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          python bms_monitor.py --once
+
+      - name: Commit and Push State (to prevent duplicate alerts)
+        run: |
+          git config --global user.name "BMS-Bot"
+          git config --global user.email "bot@github-actions.internal"
+          git add last_state.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update BMS state [skip ci]" && git push)
